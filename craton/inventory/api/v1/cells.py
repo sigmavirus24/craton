@@ -1,13 +1,15 @@
-from flask import request, g
+from flask import g
+from flask import request
 from oslo_serialization import jsonutils
 
 from craton.inventory.api.v1 import base
 from craton.inventory import db as dbapi
 
+
 class Cells(base.Resource):
 
     def get(self):
-        region =  g.args["region"]
+        region = g.args["region"]
         cell = g.args["name"]
         context = request.environ.get('context')
 
@@ -18,7 +20,7 @@ class Cells(base.Resource):
         else:
             filters = {}
             if region != 'None':
-                filters['region'] =  region
+                filters['region'] = region
             if cell != 'None':
                 filters['name'] = cell
 
@@ -26,10 +28,9 @@ class Cells(base.Resource):
             response = jsonutils.to_primitive(cells)
             return response, 200, None
 
-
     def post(self):
-        print "cells post"
-        print g.json
+        print("cells post")
+        print(g.json)
 
         return None, 200, None
 
@@ -37,8 +38,8 @@ class Cells(base.Resource):
 class CellsId(base.Resource):
 
     def put(self, id):
-        print "cells id put"
-        print g.json
+        print("cells id put")
+        print(g.json)
         return None, 405, None
 
     def delete(self, id):
@@ -49,8 +50,8 @@ class CellsId(base.Resource):
 class CellsData(base.Resource):
 
     def put(self, id):
-        print "cells data put"
-        print g.json
+        print("cells data put")
+        print(g.json)
 
         return None, 400, None
 

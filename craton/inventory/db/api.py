@@ -16,7 +16,6 @@ BACKEND_MAPPING = {'sqlalchemy': 'craton.inventory.db.sqlalchemy.api'}
 IMPL = db_api.DBAPI.from_config(cfg.CONF, backend_mapping=BACKEND_MAPPING,
                                 lazy=True)
 
-# Cells
 
 def cells_get_all(context):
     """Get all available cells."""

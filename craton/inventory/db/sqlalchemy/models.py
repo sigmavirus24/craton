@@ -16,7 +16,7 @@ from sqlalchemy import (
     UniqueConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.orm import backref, object_mapper, relationship 
+from sqlalchemy.orm import object_mapper, relationship
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy_utils.types.ip_address import IPAddressType
 from sqlalchemy_utils.types.json import JSONType
@@ -31,7 +31,7 @@ class CratonBase(models.ModelBase, models.TimestampMixin,
                  models.SoftDeleteMixin):
     def __repr__(self):
         mapper = object_mapper(self)
-        cols = getattr(self, '_repr_columns',  mapper.primary_key)
+        cols = getattr(self, '_repr_columns', mapper.primary_key)
         items = [(p.key, getattr(self, p.key))
                  for p in [
                      mapper.get_property_by_column(c) for c in cols]]
@@ -84,7 +84,8 @@ class VariableMixin(object):
     def variables(cls):
         return association_proxy(
             '_variables', 'value',
-            creator=lambda key, value: cls.variable_class(key=key, value=value))
+            creator=lambda key, value: cls.variable_class(
+                key=key, value=value))
 
     @classmethod
     def with_characteristic(self, key, value):
@@ -96,7 +97,7 @@ class Project(Base):
     __tablename__ = 'projects'
     id = Column(UUIDType, primary_key=True)
     name = Column(String(255))
-    _repr_columns=[id, name]
+    _repr_columns = [id, name]
 
     # TODO we will surely need to define more columns, but this
     # suffices to define multitenancy for MVP
@@ -114,7 +115,7 @@ class Region(Base, VariableMixin):
     project_id = Column(
         UUIDType, ForeignKey('projects.id'), index=True, nullable=False)
     name = Column(String(255))
-    _repr_columns=[id, name]
+    _repr_columns = [id, name]
 
     UniqueConstraint(project_id, name)
 
@@ -132,7 +133,7 @@ class Cell(Base, VariableMixin):
     project_id = Column(
         UUIDType, ForeignKey('projects.id'), index=True, nullable=False)
     name = Column(String(255))
-    _repr_columns=[id, name]
+    _repr_columns = [id, name]
 
     UniqueConstraint(region_id, name)
 
@@ -146,7 +147,8 @@ class Cell(Base, VariableMixin):
 # is uniquely required for a ComputeHost; otherwise just use an
 # enumerated type to distinguish
 #
-# see http://docs.sqlalchemy.org/en/latest/orm/inheritance.html#single-table-inheritance
+# See:
+#  http://docs.sqlalchemy.org/en/latest/orm/inheritance.html#single-table-inheritance
 
 class Host(Base, VariableMixin):
     """Models descriptive data about a host"""
@@ -156,22 +158,24 @@ class Host(Base, VariableMixin):
     hostname = Column(String(255), nullable=False)
     ip_address = Column(IPAddressType, nullable=False)
     region_id = Column(Integer,
-            ForeignKey('regions.id'), index=True, nullable=False)
+                       ForeignKey('regions.id'), index=True, nullable=False)
     cell_id = Column(Integer,
-            ForeignKey('cells.id'), index=True, nullable=True)
+                     ForeignKey('cells.id'), index=True, nullable=True)
     project_id = Column(UUIDType,
-            ForeignKey('projects.id'), index=True, nullable=False)
+                        ForeignKey('projects.id'), index=True, nullable=False)
     access_secret_id = Column(Integer,
-            ForeignKey('access_secrets.id'))
-    # this means the host is "active" for administration; it is explictly not state:
-    # the host may or may not be reachable by Ansible/other tooling
+                              ForeignKey('access_secrets.id'))
+    # this means the host is "active" for administration; it is
+    # explictly not state: the host may or may not be reachable by
+    # Ansible/other tooling
     active = Column(Boolean, default=True)
-    _repr_columns=[id, hostname]
+    _repr_columns = [id, hostname]
 
     UniqueConstraint(region_id, hostname)
     UniqueConstraint(region_id, ip_address)
 
-    _labels = relationship('Label', secondary=lambda: host_labels, collection_class=set)
+    _labels = relationship(
+        'Label', secondary=lambda: host_labels, collection_class=set)
     labels = association_proxy('_labels', 'label')
 
     # many-to-one relationship to regions and cells

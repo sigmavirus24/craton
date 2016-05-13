@@ -1,5 +1,3 @@
-import mock
-
 from craton.inventory.tests import TestCase
 
 

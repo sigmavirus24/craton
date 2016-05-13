@@ -2,6 +2,7 @@ from oslo_middleware import base
 from oslo_middleware import request_id
 from oslo_context import context
 
+import flask
 from flask import request
 
 
@@ -72,6 +73,7 @@ class LocalAuthContextMiddleware(ContextMiddleware):
             return cls(app)
         return _factory
 
+
 class KeystoneAuthContextMiddleware(ContextMiddleware):
 
     def __init__(self, app):
@@ -86,7 +88,7 @@ class KeystoneAuthContextMiddleware(ContextMiddleware):
         headers = request.headers
 
         try:
-            if headers["X-Identity-Status"] is "Invalid":
+            if headers["X-Identity-Status"] == "Invalid":
                 return flask.Response(status=401)
         except KeyError:
             # See: keystone middleware #exchanging-user-information
@@ -96,7 +98,7 @@ class KeystoneAuthContextMiddleware(ContextMiddleware):
             request,
             auth_token=headers.get('X-Auth-Token'),
             user=headers.get('X-User-ID'),
-            tenant=tenant_id,
+            tenant=headers.get('X-Project-ID'),
         )
 
     @classmethod

@@ -2,8 +2,6 @@
 import sys
 
 from oslo_config import cfg
-from oslo_db import exception as db_exception
-from oslo_db import options as db_options
 from oslo_db.sqlalchemy import session
 from oslo_db.sqlalchemy import utils as db_utils
 from oslo_log import log
@@ -15,12 +13,8 @@ CONF = cfg.CONF
 
 LOG = log.getLogger(__name__)
 
-
 _FACADE = None
 
-_DEFAULT_SQL_CONNECTION = 'sqlite:////Users/sulochan.acharya/test_craton/craton/test.db'
-db_options.set_defaults(cfg.CONF,
-                        connection=_DEFAULT_SQL_CONNECTION)
 
 def _create_facade_lazily():
     global _FACADE
@@ -42,16 +36,6 @@ def get_session(**kwargs):
 def get_backend():
     """The backend is this module itself."""
     return sys.modules[__name__]
-
-
-def require_admin_context(f):
-    """Decorator that ensures admin request context."""
-
-    def wrapper(*args, **kwargs):
-        if not is_admin_context(args[0]):
-            raise exception.AdminRequired()
-        return f(*args, **kwargs)
-    return wrapper
 
 
 def model_query(context, model, *args, **kwargs):
@@ -78,16 +62,15 @@ def model_query(context, model, *args, **kwargs):
 
 def cells_get_all(context):
     """Get all cells."""
-    result = model_query(context, models.Cell).\
-             all()
+    result = model_query(context, models.Cell).all()
     return result
 
 
 def cells_get_by_filters(context, filters):
     """Get all cells that match the given filters."""
     query = model_query(context, models.Cell)
-    for k,v in filters.iteritems():
+    for k, v in filters.iteritems():
         query = query.filter_by(k=v)
-    
+
     result = query.all()
     return result

@@ -310,9 +310,9 @@ def normalize(schema, data, required_defaults=None):
         for key, _schema in schema.get('properties', {}).iteritems():
             # set default
             type_ = _schema.get('type', 'object')
-            if ('default' not in _schema
-                    and key in schema.get('required', [])
-                    and type_ in required_defaults):
+            if ('default' not in _schema and
+                key in schema.get('required', []) and
+                type_ in required_defaults):
                 _schema['default'] = required_defaults[type_]
 
             # get value
@@ -329,11 +329,13 @@ def normalize(schema, data, required_defaults=None):
             rs_component.update(result)
             result = rs_component
 
-        additional_properties_schema = schema.get('additionalProperties', False)
+        additional_properties_schema = schema.get(
+            'additionalProperties', False)
         if additional_properties_schema:
             aproperties_set = set(data.keys()) - set(result.keys())
             for pro in aproperties_set:
-                result[pro] = _normalize(additional_properties_schema, data.get(pro))
+                result[pro] = _normalize(
+                    additional_properties_schema, data.get(pro))
 
         return result
 
@@ -361,7 +363,7 @@ def normalize(schema, data, required_defaults=None):
             'default': _normalize_default,
         }
         type_ = schema.get('type', 'object')
-        if not type_ in funcs:
+        if type_ not in funcs:
             type_ = 'default'
 
         return funcs[type_](schema, data)
